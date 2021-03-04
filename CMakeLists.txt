@@ -5,10 +5,11 @@ PROJECT(WBMatrix)
 include_directories(include)
 
 aux_source_directory(src/WBMatrix WBM_SRC)
+aux_source_directory(src WBM_SRC)
 
 add_library(WB_LIB ${WBM_SRC})
 
-add_executable(LMC test/lowmc_wbm.c)
+add_executable(LMC test/main.c)
 
 target_link_libraries(LMC WB_LIB)
 
