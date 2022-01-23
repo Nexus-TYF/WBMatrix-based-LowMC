@@ -1543,7 +1543,7 @@ void invsM64(M64 Mat, M64 *Mat_inv)//compute the 64*64 inverse matrix
 void invsM128(M128 Mat, M128 *Mat_inv)//compute the 128*128 inverse matrix
 {
     int i, j, k;
-    uint64_t temp[2];
+    uint64_t temp;
     identityM128(Mat_inv);
     for(i = 0; i < 64; i++)
     {
@@ -1567,21 +1567,21 @@ void invsM128(M128 Mat, M128 *Mat_inv)//compute the 128*128 inverse matrix
             {
                 if((Mat.M[j][0] & idM64[i]) == idM64[i])
                 {
-                    temp[0] = Mat.M[i][0];
+                    temp = Mat.M[i][0];
                     Mat.M[i][0] = Mat.M[j][0];
-                    Mat.M[j][0] = temp[0];
+                    Mat.M[j][0] = temp;
 
-                    temp[1] = Mat.M[i][1];
+                    temp = Mat.M[i][1];
                     Mat.M[i][1] = Mat.M[j][1];
-                    Mat.M[j][1] = temp[1];
+                    Mat.M[j][1] = temp;
 
-                    temp[0] = (*Mat_inv).M[i][0];
+                    temp = (*Mat_inv).M[i][0];
                     (*Mat_inv).M[i][0] = (*Mat_inv).M[j][0];
-                    (*Mat_inv).M[j][0] = temp[0];
+                    (*Mat_inv).M[j][0] = temp;
 
-                    temp[1] = (*Mat_inv).M[i][1];
+                    temp = (*Mat_inv).M[i][1];
                     (*Mat_inv).M[i][1] = (*Mat_inv).M[j][1];
-                    (*Mat_inv).M[j][1] = temp[1];
+                    (*Mat_inv).M[j][1] = temp;
                     break;
                 }
             }
@@ -1619,17 +1619,17 @@ void invsM128(M128 Mat, M128 *Mat_inv)//compute the 128*128 inverse matrix
             {
                 if((Mat.M[j][1] & idM64[i - 64]) == idM64[i - 64])
                 {
-                    temp[1] = Mat.M[i][1];
+                    temp = Mat.M[i][1];
                     Mat.M[i][1] = Mat.M[j][1];
-                    Mat.M[j][1] = temp[1];
+                    Mat.M[j][1] = temp;
 
-                    temp[0] = (*Mat_inv).M[i][0];
+                    temp = (*Mat_inv).M[i][0];
                     (*Mat_inv).M[i][0] = (*Mat_inv).M[j][0];
-                    (*Mat_inv).M[j][0] = temp[0];
+                    (*Mat_inv).M[j][0] = temp;
 
-                    temp[1] = (*Mat_inv).M[i][1];
+                    temp = (*Mat_inv).M[i][1];
                     (*Mat_inv).M[i][1] = (*Mat_inv).M[j][1];
-                    (*Mat_inv).M[j][1] = temp[1];
+                    (*Mat_inv).M[j][1] = temp;
                     break;
                 }
             }
@@ -1666,6 +1666,344 @@ void invsM128(M128 Mat, M128 *Mat_inv)//compute the 128*128 inverse matrix
                 Mat.M[j][0] ^= Mat.M[i][0];
                 (*Mat_inv).M[j][0] ^= (*Mat_inv).M[i][0];
                 (*Mat_inv).M[j][1] ^= (*Mat_inv).M[i][1];
+            }
+        }
+    }
+}
+void invsM256(M256 Mat, M256 *Mat_inv)//compute the 256*256 inverse matrix
+{
+    int i, j, k;
+    uint64_t temp;
+    identityM256(Mat_inv);
+    for(i = 0; i < 64; i++)//diagonal = 1?
+    {
+        if((Mat.M[i][0] & idM64[i]) == idM64[i])
+        {
+            for(j = i + 1; j < 256; j++)
+            {
+                if((Mat.M[j][0] & idM64[i]) == idM64[i])
+                {
+                    Mat.M[j][0] ^= Mat.M[i][0];
+                    Mat.M[j][1] ^= Mat.M[i][1];
+                    Mat.M[j][2] ^= Mat.M[i][2];
+                    Mat.M[j][3] ^= Mat.M[i][3];
+
+                    (*Mat_inv).M[j][0] ^= (*Mat_inv).M[i][0];
+                    (*Mat_inv).M[j][1] ^= (*Mat_inv).M[i][1];
+                    (*Mat_inv).M[j][2] ^= (*Mat_inv).M[i][2];
+                    (*Mat_inv).M[j][3] ^= (*Mat_inv).M[i][3];
+                }
+            }
+        }
+        else// swap to find 1
+        {
+            for(j = i + 1; j < 256; j++)
+            {
+                if((Mat.M[j][0] & idM64[i]) == idM64[i])
+                {
+                    temp = Mat.M[i][0];
+                    Mat.M[i][0] = Mat.M[j][0];
+                    Mat.M[j][0] = temp;
+
+                    temp = Mat.M[i][1];
+                    Mat.M[i][1] = Mat.M[j][1];
+                    Mat.M[j][1] = temp;
+
+                    temp = Mat.M[i][2];
+                    Mat.M[i][2] = Mat.M[j][2];
+                    Mat.M[j][2] = temp;
+
+                    temp = Mat.M[i][3];
+                    Mat.M[i][3] = Mat.M[j][3];
+                    Mat.M[j][3] = temp;
+
+                    temp = (*Mat_inv).M[i][0];
+                    (*Mat_inv).M[i][0] = (*Mat_inv).M[j][0];
+                    (*Mat_inv).M[j][0] = temp;
+
+                    temp = (*Mat_inv).M[i][1];
+                    (*Mat_inv).M[i][1] = (*Mat_inv).M[j][1];
+                    (*Mat_inv).M[j][1] = temp;
+
+                    temp = (*Mat_inv).M[i][2];
+                    (*Mat_inv).M[i][2] = (*Mat_inv).M[j][2];
+                    (*Mat_inv).M[j][2] = temp;
+
+                    temp = (*Mat_inv).M[i][3];
+                    (*Mat_inv).M[i][3] = (*Mat_inv).M[j][3];
+                    (*Mat_inv).M[j][3] = temp;
+                    break;
+                }
+            }
+            for(k = i + 1; k < 256; k++)
+            {
+                if((Mat.M[k][0] & idM64[i]) == idM64[i])
+                {
+                    Mat.M[k][0] ^= Mat.M[i][0];
+                    Mat.M[k][1] ^= Mat.M[i][1];
+                    Mat.M[k][2] ^= Mat.M[i][2];
+                    Mat.M[k][3] ^= Mat.M[i][3];
+
+                    (*Mat_inv).M[k][0] ^= (*Mat_inv).M[i][0];
+                    (*Mat_inv).M[k][1] ^= (*Mat_inv).M[i][1];
+                    (*Mat_inv).M[k][2] ^= (*Mat_inv).M[i][2];
+                    (*Mat_inv).M[k][3] ^= (*Mat_inv).M[i][3];
+                }
+            }
+        }
+    }
+    for(i = 64; i < 128; i++)//diagonal = 1?
+    {
+        if((Mat.M[i][1] & idM64[i - 64]) == idM64[i - 64])
+        {
+            for(j = i + 1; j < 256; j++)
+            {
+                if((Mat.M[j][1] & idM64[i - 64]) == idM64[i - 64])
+                {
+                    Mat.M[j][1] ^= Mat.M[i][1];
+                    Mat.M[j][2] ^= Mat.M[i][2];
+                    Mat.M[j][3] ^= Mat.M[i][3];
+
+                    (*Mat_inv).M[j][0] ^= (*Mat_inv).M[i][0];
+                    (*Mat_inv).M[j][1] ^= (*Mat_inv).M[i][1];
+                    (*Mat_inv).M[j][2] ^= (*Mat_inv).M[i][2];
+                    (*Mat_inv).M[j][3] ^= (*Mat_inv).M[i][3];
+                }
+            }
+        }
+        else// swap to find 1
+        {
+            for(j = i + 1; j < 256; j++)
+            {
+                if((Mat.M[j][1] & idM64[i - 64]) == idM64[i - 64])
+                {
+                    temp = Mat.M[i][1];
+                    Mat.M[i][1] = Mat.M[j][1];
+                    Mat.M[j][1] = temp;
+
+                    temp = Mat.M[i][2];
+                    Mat.M[i][2] = Mat.M[j][2];
+                    Mat.M[j][2] = temp;
+
+                    temp = Mat.M[i][3];
+                    Mat.M[i][3] = Mat.M[j][3];
+                    Mat.M[j][3] = temp;
+
+                    temp = (*Mat_inv).M[i][0];
+                    (*Mat_inv).M[i][0] = (*Mat_inv).M[j][0];
+                    (*Mat_inv).M[j][0] = temp;
+
+                    temp = (*Mat_inv).M[i][1];
+                    (*Mat_inv).M[i][1] = (*Mat_inv).M[j][1];
+                    (*Mat_inv).M[j][1] = temp;
+
+                    temp = (*Mat_inv).M[i][2];
+                    (*Mat_inv).M[i][2] = (*Mat_inv).M[j][2];
+                    (*Mat_inv).M[j][2] = temp;
+
+                    temp = (*Mat_inv).M[i][3];
+                    (*Mat_inv).M[i][3] = (*Mat_inv).M[j][3];
+                    (*Mat_inv).M[j][3] = temp;
+                    break;
+                }
+            }
+            for(k = i + 1; k < 256; k++)
+            {
+                if((Mat.M[k][1] & idM64[i - 64]) == idM64[i - 64])
+                {
+                    Mat.M[k][1] ^= Mat.M[i][1];
+                    Mat.M[k][2] ^= Mat.M[i][2];
+                    Mat.M[k][3] ^= Mat.M[i][3];
+
+                    (*Mat_inv).M[k][0] ^= (*Mat_inv).M[i][0];
+                    (*Mat_inv).M[k][1] ^= (*Mat_inv).M[i][1];
+                    (*Mat_inv).M[k][2] ^= (*Mat_inv).M[i][2];
+                    (*Mat_inv).M[k][3] ^= (*Mat_inv).M[i][3];
+                }
+            }
+        }
+    }
+    for(i = 128; i < 192; i++)//diagonal = 1?
+    {
+        if((Mat.M[i][2] & idM64[i - 128]) == idM64[i - 128])
+        {
+            for(j = i + 1; j < 256; j++)
+            {
+                if((Mat.M[j][2] & idM64[i - 128]) == idM64[i - 128])
+                {
+                    Mat.M[j][2] ^= Mat.M[i][2];
+                    Mat.M[j][3] ^= Mat.M[i][3];
+
+                    (*Mat_inv).M[j][0] ^= (*Mat_inv).M[i][0];
+                    (*Mat_inv).M[j][1] ^= (*Mat_inv).M[i][1];
+                    (*Mat_inv).M[j][2] ^= (*Mat_inv).M[i][2];
+                    (*Mat_inv).M[j][3] ^= (*Mat_inv).M[i][3];
+                }
+            }
+        }
+        else// swap to find 1
+        {
+            for(j = i + 1; j < 256; j++)
+            {
+                if((Mat.M[j][2] & idM64[i - 128]) == idM64[i - 128])
+                {
+                    temp = Mat.M[i][2];
+                    Mat.M[i][2] = Mat.M[j][2];
+                    Mat.M[j][2] = temp;
+
+                    temp = Mat.M[i][3];
+                    Mat.M[i][3] = Mat.M[j][3];
+                    Mat.M[j][3] = temp;
+
+                    temp = (*Mat_inv).M[i][0];
+                    (*Mat_inv).M[i][0] = (*Mat_inv).M[j][0];
+                    (*Mat_inv).M[j][0] = temp;
+
+                    temp = (*Mat_inv).M[i][1];
+                    (*Mat_inv).M[i][1] = (*Mat_inv).M[j][1];
+                    (*Mat_inv).M[j][1] = temp;
+
+                    temp = (*Mat_inv).M[i][2];
+                    (*Mat_inv).M[i][2] = (*Mat_inv).M[j][2];
+                    (*Mat_inv).M[j][2] = temp;
+
+                    temp = (*Mat_inv).M[i][3];
+                    (*Mat_inv).M[i][3] = (*Mat_inv).M[j][3];
+                    (*Mat_inv).M[j][3] = temp;
+                    break;
+                }
+            }
+            for(k = i + 1; k < 256; k++)
+            {
+                if((Mat.M[k][2] & idM64[i - 128]) == idM64[i - 128])
+                {
+                    Mat.M[k][2] ^= Mat.M[i][2];
+                    Mat.M[k][3] ^= Mat.M[i][3];
+
+                    (*Mat_inv).M[k][0] ^= (*Mat_inv).M[i][0];
+                    (*Mat_inv).M[k][1] ^= (*Mat_inv).M[i][1];
+                    (*Mat_inv).M[k][2] ^= (*Mat_inv).M[i][2];
+                    (*Mat_inv).M[k][3] ^= (*Mat_inv).M[i][3];
+                }
+            }
+        }
+    }
+    for(i = 192; i < 256; i++)//diagonal = 1?
+    {
+        if((Mat.M[i][3] & idM64[i - 192]) == idM64[i - 192])
+        {
+            for(j = i + 1; j < 256; j++)
+            {
+                if((Mat.M[j][3] & idM64[i - 192]) == idM64[i - 192])
+                {
+                    Mat.M[j][3] ^= Mat.M[i][3];
+
+                    (*Mat_inv).M[j][0] ^= (*Mat_inv).M[i][0];
+                    (*Mat_inv).M[j][1] ^= (*Mat_inv).M[i][1];
+                    (*Mat_inv).M[j][2] ^= (*Mat_inv).M[i][2];
+                    (*Mat_inv).M[j][3] ^= (*Mat_inv).M[i][3];
+                }
+            }
+        }
+        else// swap to find 1
+        {
+            for(j = i + 1; j < 256; j++)
+            {
+                if((Mat.M[j][3] & idM64[i - 192]) == idM64[i - 192])
+                {
+                    temp = Mat.M[i][3];
+                    Mat.M[i][3] = Mat.M[j][3];
+                    Mat.M[j][3] = temp;
+
+                    temp = (*Mat_inv).M[i][0];
+                    (*Mat_inv).M[i][0] = (*Mat_inv).M[j][0];
+                    (*Mat_inv).M[j][0] = temp;
+
+                    temp = (*Mat_inv).M[i][1];
+                    (*Mat_inv).M[i][1] = (*Mat_inv).M[j][1];
+                    (*Mat_inv).M[j][1] = temp;
+
+                    temp = (*Mat_inv).M[i][2];
+                    (*Mat_inv).M[i][2] = (*Mat_inv).M[j][2];
+                    (*Mat_inv).M[j][2] = temp;
+
+                    temp = (*Mat_inv).M[i][3];
+                    (*Mat_inv).M[i][3] = (*Mat_inv).M[j][3];
+                    (*Mat_inv).M[j][3] = temp;
+                    break;
+                }
+            }
+            for(k = i + 1; k < 256; k++)
+            {
+                if((Mat.M[k][3] & idM64[i - 192]) == idM64[i - 192])
+                {
+                    Mat.M[k][3] ^= Mat.M[i][3];
+
+                    (*Mat_inv).M[k][0] ^= (*Mat_inv).M[i][0];
+                    (*Mat_inv).M[k][1] ^= (*Mat_inv).M[i][1];
+                    (*Mat_inv).M[k][2] ^= (*Mat_inv).M[i][2];
+                    (*Mat_inv).M[k][3] ^= (*Mat_inv).M[i][3];
+                }
+            }
+        }
+    }
+    for(i = 255; i >= 192; i--)
+    {
+        for(j = i - 1; j >= 0; j--)
+        {
+            if((Mat.M[j][3] & idM64[i - 192]) == idM64[i - 192])
+            {
+                Mat.M[j][3] ^= Mat.M[i][3];
+
+                (*Mat_inv).M[j][0] ^= (*Mat_inv).M[i][0];
+                (*Mat_inv).M[j][1] ^= (*Mat_inv).M[i][1];
+                (*Mat_inv).M[j][2] ^= (*Mat_inv).M[i][2];
+                (*Mat_inv).M[j][3] ^= (*Mat_inv).M[i][3];
+            }
+        }
+    }
+    for(i = 191; i >= 128; i--)
+    {
+        for(j = i - 1; j >= 0; j--)
+        {
+            if((Mat.M[j][2] & idM64[i - 128]) == idM64[i - 128])
+            {
+                Mat.M[j][2] ^= Mat.M[i][2];
+
+                (*Mat_inv).M[j][0] ^= (*Mat_inv).M[i][0];
+                (*Mat_inv).M[j][1] ^= (*Mat_inv).M[i][1];
+                (*Mat_inv).M[j][2] ^= (*Mat_inv).M[i][2];
+                (*Mat_inv).M[j][3] ^= (*Mat_inv).M[i][3];
+            }
+        }
+    }
+    for(i = 127; i >= 64; i--)
+    {
+        for(j = i - 1; j >= 0; j--)
+        {
+            if((Mat.M[j][1] & idM64[i - 64]) == idM64[i - 64])
+            {
+                Mat.M[j][1] ^= Mat.M[i][1];
+
+                (*Mat_inv).M[j][0] ^= (*Mat_inv).M[i][0];
+                (*Mat_inv).M[j][1] ^= (*Mat_inv).M[i][1];
+                (*Mat_inv).M[j][2] ^= (*Mat_inv).M[i][2];
+                (*Mat_inv).M[j][3] ^= (*Mat_inv).M[i][3];
+            }
+        }
+    }
+    for(i = 63; i >= 0; i--)
+    {
+        for(j = i - 1; j >= 0; j--)
+        {
+            if((Mat.M[j][0] & idM64[i]) == idM64[i])
+            {
+                Mat.M[j][0] ^= Mat.M[i][0];
+
+                (*Mat_inv).M[j][0] ^= (*Mat_inv).M[i][0];
+                (*Mat_inv).M[j][1] ^= (*Mat_inv).M[i][1];
+                (*Mat_inv).M[j][2] ^= (*Mat_inv).M[i][2];
+                (*Mat_inv).M[j][3] ^= (*Mat_inv).M[i][3];
             }
         }
     }
@@ -1803,12 +2141,19 @@ void printU32(uint32_t n)//printf uint32_t
 }
 void printU64(uint64_t n)//printf uint64_t
 {
-    printf("0x%x\n", n);
+    printf("0llx%x\n", n);
 }
 void printU128(uint64_t n[])//printf uint128_t
 {
-    printf("0x%x ", n[0]);
-    printf("0x%x\n", n[1]);
+    printf("0llx%x ", n[0]);
+    printf("0llx%x\n", n[1]);
+}
+void printU256(uint64_t n[])//printf uint256_t
+{
+    printf("0x%llx ", n[0]);
+    printf("0x%llx ", n[1]);
+    printf("0x%llx ", n[2]);
+    printf("0x%llx\n", n[3]);
 }
 void printbitM4(M4 Mat)//printf Matrix 4*4 in the form of bits 
 {
@@ -4696,6 +5041,16 @@ void MatAddMatM128(M128 Mat1, M128 Mat2, M128 *Mat)
     {
         (*Mat).M[i][0] = Mat1.M[i][0] ^ Mat2.M[i][0];
         (*Mat).M[i][1] = Mat1.M[i][1] ^ Mat2.M[i][1];
+    }
+}
+void MatAddMatM256(M256 Mat1, M256 Mat2, M256 *Mat)
+{
+    for(int i = 0; i < 256; i++)
+    {
+        (*Mat).M[i][0] = Mat1.M[i][0] ^ Mat2.M[i][0];
+        (*Mat).M[i][1] = Mat1.M[i][1] ^ Mat2.M[i][1];
+        (*Mat).M[i][2] = Mat1.M[i][2] ^ Mat2.M[i][2];
+        (*Mat).M[i][3] = Mat1.M[i][3] ^ Mat2.M[i][3];
     }
 }
 void MatMulMatM4(M4 Mat1, M4 Mat2, M4 *Mat)//matrix multiplication 4*4 mul 4*4 -> 4*4

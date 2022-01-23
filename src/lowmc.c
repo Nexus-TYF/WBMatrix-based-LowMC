@@ -21,7 +21,7 @@ void set_key(V256 k)
     key.V[3] = k.V[3];
     keyschedule();
 }
-void instantiate_LowMC()
+void instantiate_LowMC(V256 k)
 {
     // Create LinMatrices and invLinMatrices
     for (unsigned r = 0; r < rounds; ++r) 
@@ -43,8 +43,6 @@ void instantiate_LowMC()
         } while(isinvertM256(KeyMatrices[r]));
     }
     // key schedule
-    V256 k;
-    k.V[0] = 0x0123456789abcdef;
     set_key(k);
     
     return;
@@ -57,9 +55,9 @@ V256 Substitution(V256 message)
     if(numofboxes <= 21)
     {
         temp.V[0] = (message.V[0] >> 3 * numofboxes);
-        temp.V[1] ^= message.V[1];
-        temp.V[2] ^= message.V[2];
-        temp.V[3] ^= message.V[3];
+        temp.V[1] = message.V[1];
+        temp.V[2] = message.V[2];
+        temp.V[3] = message.V[3];
         //Get the rest through the Sboxes
         for (unsigned i = 1; i <= numofboxes; ++i) 
         {
@@ -67,53 +65,7 @@ V256 Substitution(V256 message)
             temp.V[0] ^= Sbox[ ((message.V[0] >> 3 * (numofboxes - i)) & 0x7) ];
         }
     }
-    else if (numofboxes <= 42)
-    {
-        temp.V[1] ^= (message.V[1] >> (3 * (numofboxes - 22) + 2));
-        temp.V[2] ^= message.V[2];
-        temp.V[3] ^= message.V[3];
-        //Get the rest through the Sboxes
-        temp.V[0] ^= Sbox[ (message.V[1] & 0x3 << 1) ^ (message.V[0] >> 63 & 0x1) ];
-        for (unsigned i = 1; i <= 21; ++i) 
-        {
-            temp.V[0] <<= 3;
-            temp.V[0] ^= Sbox[ ((message.V[0] >> 3 * (21 - i)) & 0x7) ];
-        }
-        for (unsigned i = 1; i <= (numofboxes - 22); ++i) 
-        {
-            temp.V[1] <<= 3;
-            temp.V[1] ^= Sbox[ ((message.V[1] >> 3 * (numofboxes - 22 - i) + 2) & 0x7) ];
-        }
-        temp.V[1] <<= 2;
-        temp.V[1] ^= ((Sbox[ (message.V[1] & 0x3 << 1) ^ (message.V[0] >> 63 & 0x1) ] & 0x6) >> 1);
-    }
-    else if (numofboxes <= 64)
-    {
-        temp.V[3] ^= message.V[3];
-        //Get the rest through the Sboxes
-        temp.V[0] ^= Sbox[ (message.V[1] & 0x3 << 1) ^ (message.V[0] >> 63 & 0x1) ];
-        for (unsigned i = 1; i <= 21; ++i) 
-        {
-            temp.V[0] <<= 3;
-            temp.V[0] ^= Sbox[ ((message.V[0] >> 3 * (21 - i)) & 0x7) ];
-        }
-        temp.V[1] ^= Sbox[ (message.V[2] & 0x1 << 2) ^ (message.V[1] >> 62 & 0x3) ];
-        for (unsigned i = 1; i <= 20; ++i) 
-        {
-            temp.V[1] <<= 3;
-            temp.V[1] ^= Sbox[ ((message.V[1] >> 3 * (numofboxes - 22 - i) + 2) & 0x7) ];
-        }
-        temp.V[1] <<= 2;
-        temp.V[1] ^= ((Sbox[ (message.V[1] & 0x3 << 1) ^ (message.V[0] >> 63 & 0x1) ] & 0x6) >> 1);
-        for (unsigned i = 1; i <= (numofboxes - 43); ++i) 
-        {
-            temp.V[2] <<= 3;
-            temp.V[2] ^= Sbox[ ((message.V[2] >> 3 * (numofboxes - 43 - i) + 1) & 0x7) ];
-        }
-        temp.V[2] <<= 1;
-        temp.V[2] ^= ((Sbox[ (message.V[2] & 0x1 << 2) ^ (message.V[1] >> 62 & 0x3) ] & 0x4) >> 2);
-    }
-    
+    else temp = message;
     return temp;
 }
 V256 invSubstitution(V256 message)
@@ -124,9 +76,9 @@ V256 invSubstitution(V256 message)
     if(numofboxes <= 21)
     {
         temp.V[0] = (message.V[0] >> 3 * numofboxes);
-        temp.V[1] ^= message.V[1];
-        temp.V[2] ^= message.V[2];
-        temp.V[3] ^= message.V[3];
+        temp.V[1] = message.V[1];
+        temp.V[2] = message.V[2];
+        temp.V[3] = message.V[3];
         //Get the rest through the Sboxes
         for (unsigned i = 1; i <= numofboxes; ++i) 
         {
@@ -134,52 +86,7 @@ V256 invSubstitution(V256 message)
             temp.V[0] ^= invSbox[ ((message.V[0] >> 3 * (numofboxes - i)) & 0x7) ];
         }
     }
-    else if (numofboxes <= 42)
-    {
-        temp.V[1] ^= (message.V[1] >> (3 * (numofboxes - 22) + 2));
-        temp.V[2] ^= message.V[2];
-        temp.V[3] ^= message.V[3];
-        //Get the rest through the Sboxes
-        temp.V[0] ^= invSbox[ (message.V[1] & 0x3 << 1) ^ (message.V[0] >> 63 & 0x1) ];
-        for (unsigned i = 1; i <= 21; ++i) 
-        {
-            temp.V[0] <<= 3;
-            temp.V[0] ^= invSbox[ ((message.V[0] >> 3 * (21 - i)) & 0x7) ];
-        }
-        for (unsigned i = 1; i <= (numofboxes - 22); ++i) 
-        {
-            temp.V[1] <<= 3;
-            temp.V[1] ^= invSbox[ ((message.V[1] >> 3 * (numofboxes - 22 - i) + 2) & 0x7) ];
-        }
-        temp.V[1] <<= 2;
-        temp.V[1] ^= ((invSbox[ (message.V[1] & 0x3 << 1) ^ (message.V[0] >> 63 & 0x1) ] & 0x6) >> 1);
-    }
-    else if (numofboxes <= 64)
-    {
-        temp.V[3] ^= message.V[3];
-        //Get the rest through the Sboxes
-        temp.V[0] ^= invSbox[ (message.V[1] & 0x3 << 1) ^ (message.V[0] >> 63 & 0x1) ];
-        for (unsigned i = 1; i <= 21; ++i) 
-        {
-            temp.V[0] <<= 3;
-            temp.V[0] ^= invSbox[ ((message.V[0] >> 3 * (21 - i)) & 0x7) ];
-        }
-        temp.V[1] ^= invSbox[ (message.V[2] & 0x1 << 2) ^ (message.V[1] >> 62 & 0x3) ];
-        for (unsigned i = 1; i <= 20; ++i) 
-        {
-            temp.V[1] <<= 3;
-            temp.V[1] ^= invSbox[ ((message.V[1] >> 3 * (numofboxes - 22 - i) + 2) & 0x7) ];
-        }
-        temp.V[1] <<= 2;
-        temp.V[1] ^= ((invSbox[ (message.V[1] & 0x3 << 1) ^ (message.V[0] >> 63 & 0x1) ] & 0x6) >> 1);
-        for (unsigned i = 1; i <= (numofboxes - 43); ++i) 
-        {
-            temp.V[2] <<= 3;
-            temp.V[2] ^= invSbox[ ((message.V[2] >> 3 * (numofboxes - 43 - i) + 1) & 0x7) ];
-        }
-        temp.V[2] <<= 1;
-        temp.V[2] ^= ((invSbox[ (message.V[2] & 0x1 << 2) ^ (message.V[1] >> 62 & 0x3) ] & 0x4) >> 2);
-    }
+    else temp = message;
     return temp;
 }
 V256 encrypt(V256 message) 
